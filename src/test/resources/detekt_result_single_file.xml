@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="4.3">
+    <file name="/Users/davidbilik/projects/skeleton/features/recipelist/src/main/java/cz/ackee/sample/recipelist/presentation/RecipeListFragment.kt">
+        <error line="47" column="1" severity="warning" message="Needless blank line(s)"
+               source="detekt.NoConsecutiveBlankLines"/>
+        <error line="29" column="36" severity="warning" message="Missing newline before &quot;)&quot;"
+               source="detekt.ParameterListWrapping"/>
+    </file>
+</checkstyle>
