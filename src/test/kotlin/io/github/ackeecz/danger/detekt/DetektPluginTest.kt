@@ -60,4 +60,18 @@ class DetektPluginTest {
         Truth.assertThat(context.warnings)
             .isEmpty()
     }
+
+    @Test
+    fun `should have relative path in filename`() {
+        // before
+        val context = FakeDangerContext()
+        DetektPlugin.context = context
+        // when
+        DetektPlugin.parseAndReport(
+            File(ClassLoader.getSystemResource("detekt_result_single_file.xml").toURI())
+        )
+        // then
+        Truth.assertThat(context.warnings.first().file)
+            .isEqualTo("features/recipelist/src/main/java/cz/ackee/sample/recipelist/presentation/RecipeListFragment.kt")
+    }
 }

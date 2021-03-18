@@ -17,17 +17,30 @@ object DetektPlugin : DangerPlugin() {
 
     override val id = "danger-kotlin-detekt"
 
+    /**
+     * Parse XML output of detekt and report inline comment
+     * to the pull request.
+     *
+     * @param reportFiles files representing detekt XML output
+     */
     fun parseAndReport(vararg reportFiles: File) {
         val mapper = XmlMapper()
         reportFiles.forEach { file ->
             FileInputStream(file).use { fileInputStream ->
-                val report = mapper.readValue(
-                    fileInputStream,
-                    DetektReport::class.java
-                )
+                val report = parse(mapper, fileInputStream)
                 report(report)
             }
         }
+    }
+
+    private fun parse(
+        mapper: XmlMapper,
+        fileInputStream: FileInputStream
+    ): DetektReport {
+        return mapper.readValue(
+            fileInputStream,
+            DetektReport::class.java
+        )
     }
 
     private fun report(report: DetektReport) {
@@ -36,7 +49,9 @@ object DetektPlugin : DangerPlugin() {
             file.errors.forEach { error ->
                 context.warn(
                     message = "Detekt: ${error.message}, rule: ${error.source}",
-                    file = realFile.name,
+                    file = realFile.absolutePath.removePrefix(
+                        "${File("").absolutePath}/"
+                    ),
                     line = error.line.toIntOrNull() ?: 0
                 )
             }
@@ -46,21 +61,21 @@ object DetektPlugin : DangerPlugin() {
 
 @JacksonXmlRootElement(namespace = "checkstyle")
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class DetektReport(
+internal data class DetektReport(
     @field:JsonProperty("file")
     @field:JacksonXmlElementWrapper(useWrapping = false)
     val files: List<ReportFile> = emptyList()
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class ReportFile(
+internal data class ReportFile(
     @field:JacksonXmlProperty val name: String = "",
     @field:JsonProperty("error")
     @field:JacksonXmlElementWrapper(useWrapping = false) val errors: List<ReportError> = emptyList()
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class ReportError(
+internal data class ReportError(
     @field:JacksonXmlProperty val line: String = "",
     @field:JacksonXmlProperty val column: String = "",
     @field:JacksonXmlProperty val severity: String = "",
