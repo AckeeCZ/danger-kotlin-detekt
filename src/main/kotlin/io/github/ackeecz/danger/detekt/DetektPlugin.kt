@@ -47,12 +47,15 @@ object DetektPlugin : DangerPlugin() {
         report.files.forEach { file ->
             val realFile = File(file.name)
             file.errors.forEach { error ->
+                val line = error.line.toIntOrNull() ?: 0
+                val message = "Detekt: ${error.message}, rule: ${error.source}"
+                val filePath = realFile.absolutePath.removePrefix(
+                    "${File("").absolutePath}/"
+                )
                 context.warn(
-                    message = "Detekt: ${error.message}, rule: ${error.source}",
-                    file = realFile.absolutePath.removePrefix(
-                        "${File("").absolutePath}/"
-                    ),
-                    line = error.line.toIntOrNull() ?: 0
+                    message = message,
+                    file = filePath,
+                    line = line
                 )
             }
         }
